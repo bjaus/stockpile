@@ -22,22 +22,21 @@ class Cache(MutableMapping):
         self.feeder = feeder
         self.maxsize = maxsize
         self.iterable = iterable
-        self.freederobj = feederobj
+        self.feederobj = feederobj
 
     def __repr__(self):
-        return "{}(size={:,} maxsize={:,} ttl={} hits={:,} misses={})".format(
+        return "{}(size={:,} maxsize={:,} hits={:,} misses={:,}{}".format(
             self.__class__.__name__,
             self.size,
             self.maxsize,
-            f"{self.ttl:,}" if self.ttl else "'off'",
-            0,
-            0,
+            self.hits,
+            self.misses,
+            ")" if not self.ttl else f" ttl={self.ttl:,})",
         )
 
     def __setitem__(self, key, value):
         time = self.timer()
         self.expire(time)
-        size = 0 if key in self._data else 1
         if self.ttl:
             link, err = self._linkup(key)
             if err:
@@ -45,7 +44,7 @@ class Cache(MutableMapping):
             else:
                 link.unlink()
             link.onlink(root=self._root, expire=time + self.ttl)
-        self._size += size
+        self._size += 0 if key in self._data else 1
         self._data[key] = value
         if self._size > self._maxsize:
             self.popitem()
@@ -57,7 +56,7 @@ class Cache(MutableMapping):
             self._hits += 1
             return self._data[key]
         self._misses += 1
-        return self.__missin__(key)
+        return self.__missing__(key)
 
     def __delitem__(self, key):
         del self._data[key]
@@ -79,7 +78,7 @@ class Cache(MutableMapping):
             return link.expire > self.timer()
         return key in self._data
 
-    def __iterable__(self):
+    def __iter__(self):
         if not self.iterable:
             raise CacheError("set `iterable` to `True` to enable")
         todel = list()
@@ -98,6 +97,7 @@ class Cache(MutableMapping):
         if not self.feeder:
             raise KeyError(key)
         try:
+            breakpoint()
             if self.feederobj:
                 self[key] = self.feeder(self.feederobj, key)
             else:
@@ -179,7 +179,7 @@ class Cache(MutableMapping):
             return
         if not time:
             time = self.timer()
-        curr = self._root.next()
+        curr = self._root.next
         while curr is not self._root and curr.expire < time:
             nxt = curr.next
             del self[curr.key]
