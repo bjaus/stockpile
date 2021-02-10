@@ -97,7 +97,6 @@ class Cache(MutableMapping):
         if not self.feeder:
             raise KeyError(key)
         try:
-            breakpoint()
             if self.feederobj:
                 self[key] = self.feeder(self.feederobj, key)
             else:
