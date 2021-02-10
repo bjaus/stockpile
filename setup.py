@@ -15,7 +15,7 @@ if os.path.exists('requirements.txt'):
 setuptools.setup(
     name='stockpile',
     version='1.0.0',
-    author='Brandon Jaus'
+    author='Brandon Jaus',
     author_email='brandon.jaus@gamil.com',
     description='cache implementation with per-item time-to-live (TTL)',
     long_description=long_description,
